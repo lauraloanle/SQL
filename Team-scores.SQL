@@ -1,0 +1,28 @@
+#link: https://leetcode.com/problems/team-scores-in-football-tournament/?fbclid=IwAR0opCwkAHIE-o2-Od5QcF6XTz207EpAwyuHd559FQJcdcwIA8CJNDbl27k
+
+# Use 'LEFT JOIN' to keep the records of all teams (if select 'JOIN', it will be 'INNER JOIN' and not include the one that does not have any record)
+# Write your MySQL query statement below
+SELECT TEAM_ID, TEAM_NAME, SUM(POINTS) AS NUM_POINTS
+FROM
+
+((SELECT TEAM_ID, TEAM_NAME, 
+ SUM(CASE WHEN HOST_GOALS > GUEST_GOALS THEN 3
+           WHEN HOST_GOALS = GUEST_GOALS THEN 1
+           ELSE 0
+ END) AS POINTS
+FROM TEAMS T LEFT JOIN MATCHES M
+ON T.TEAM_ID = M.HOST_TEAM
+GROUP BY TEAM_ID)
+
+UNION ALL
+
+(SELECT TEAM_ID, TEAM_NAME, 
+ SUM(CASE WHEN HOST_GOALS < GUEST_GOALS THEN 3
+           WHEN HOST_GOALS = GUEST_GOALS THEN 1
+           ELSE 0
+ END) AS POINTS
+FROM TEAMS T LEFT JOIN MATCHES M
+ON T.TEAM_ID = M.GUEST_TEAM
+GROUP BY TEAM_ID)) TEMP
+GROUP BY TEAM_ID
+ORDER BY NUM_POINTS DESC, TEAM_ID
